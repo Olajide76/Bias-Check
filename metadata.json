@@ -1,0 +1,7 @@
+{
+  "name": "BiasCheck: Algorithmic Resume Sensitivity Audit",
+  "description": "Audit candidate resumes against automated screening model sensitivity using counterfactual controlled variants.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
