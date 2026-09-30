@@ -15,7 +15,12 @@ import { MethodologyScreen } from './components/MethodologyScreen';
 import { AboutScreen } from './components/AboutScreen';
 import { ReportModal } from './components/ReportModal';
 import { ProfileModal } from './components/ProfileModal';
-import { INITIAL_AUDIT_RECORD, PAST_AUDITS } from './data/mockData';
+import {
+  INITIAL_AUDIT_RECORD,
+  SADIQ_AUDIT_RECORD,
+  ELENA_AUDIT_RECORD,
+  PAST_AUDITS
+} from './data/mockData';
 import { AuditRecord, CounterfactualVariant, ExtractedFeatures, JobTarget, TabType } from './types';
 import { computeAuditScoring } from './utils/scoringEngine';
 
@@ -26,14 +31,33 @@ export default function App() {
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [calibrationMode, setCalibrationMode] = useState('CALIBRATED');
+  const [selectedCandidateKey, setSelectedCandidateKey] = useState<'amara' | 'sadiq' | 'elena'>('amara');
 
-  // Launch pre-loaded demo audit for Amara Okoye
-  const handleStartDemoAudit = () => {
-    setActiveAudit(INITIAL_AUDIT_RECORD);
+  // Launch audit directly for a specific candidate
+  const handleStartCandidateAudit = (candidateKey: 'amara' | 'sadiq' | 'elena') => {
+    let targetAudit: AuditRecord;
+    if (candidateKey === 'sadiq') {
+      targetAudit = SADIQ_AUDIT_RECORD;
+    } else if (candidateKey === 'elena') {
+      targetAudit = ELENA_AUDIT_RECORD;
+    } else {
+      targetAudit = INITIAL_AUDIT_RECORD;
+    }
+
+    setActiveAudit(targetAudit);
+    setSelectedCandidateKey(candidateKey);
+    // Add to audit history if not already present
+    setAuditList((prev) => [targetAudit, ...prev.filter((a) => a.id !== targetAudit.id)]);
     setCurrentTab('running');
   };
 
-  // Launch new audit from wizard
+  // Open wizard pre-configured with candidate
+  const handleOpenWizardWithCandidate = (candidateKey: 'amara' | 'sadiq' | 'elena') => {
+    setSelectedCandidateKey(candidateKey);
+    setCurrentTab('new-audit');
+  };
+
+  // Launch new audit configured from wizard
   const handleRunConfiguredAudit = (config: {
     features: ExtractedFeatures;
     jobTarget: JobTarget;
@@ -86,6 +110,7 @@ export default function App() {
   const handleResetSession = () => {
     setActiveAudit(INITIAL_AUDIT_RECORD);
     setAuditList(PAST_AUDITS);
+    setSelectedCandidateKey('amara');
     setCurrentTab('overview');
   };
 
@@ -104,14 +129,22 @@ export default function App() {
       <main className="flex-1 flex flex-col relative w-full pt-16 transition-all duration-200">
         {currentTab === 'overview' && (
           <OverviewScreen
-            onStartDemo={handleStartDemoAudit}
-            onStartCustom={() => setCurrentTab('new-audit')}
+            onStartDemo={() => handleStartCandidateAudit('amara')}
+            onStartCandidate={handleStartCandidateAudit}
+            onConfigureCandidate={handleOpenWizardWithCandidate}
+            onStartCustom={() => {
+              setSelectedCandidateKey('amara');
+              setCurrentTab('new-audit');
+            }}
             onNavigate={(tab) => setCurrentTab(tab)}
           />
         )}
 
         {currentTab === 'new-audit' && (
-          <NewAuditWizard onRunAudit={handleRunConfiguredAudit} />
+          <NewAuditWizard
+            initialCandidate={selectedCandidateKey}
+            onRunAudit={handleRunConfiguredAudit}
+          />
         )}
 
         {currentTab === 'running' && (
@@ -143,7 +176,7 @@ export default function App() {
         {currentTab === 'about' && <AboutScreen />}
       </main>
 
-      {/* Persistent Bottom Tab Navigation (hidden on running audit screen for immersive focus) */}
+      {/* Persistent Bottom Tab Navigation (hidden on desktop and on running audit screen) */}
       {currentTab !== 'running' && (
         <BottomNav currentTab={currentTab} onNavigate={(tab) => setCurrentTab(tab)} />
       )}

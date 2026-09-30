@@ -1,4 +1,9 @@
-import { CounterfactualVariant, ExtractedFeatures, JobTarget, Recommendation, AuditRecord } from '../types';
+import { CounterfactualVariant, ExtractedFeatures, JobTarget, Recommendation } from '../types';
+import {
+  AMARA_RECOMMENDATIONS,
+  SADIQ_RECOMMENDATIONS,
+  ELENA_RECOMMENDATIONS
+} from '../data/mockData';
 
 export interface AuditComputationResult {
   observedSpread: number;
@@ -29,7 +34,7 @@ export function computeAuditScoring(
 ): AuditComputationResult {
   const nameLower = features.name.toLowerCase();
   const isAmara = nameLower.includes('amara');
-  const isTariq = nameLower.includes('tariq');
+  const isSadiq = nameLower.includes('sadiq') || nameLower.includes('tariq');
   const isElena = nameLower.includes('elena');
 
   let baseA: number;
@@ -38,19 +43,19 @@ export function computeAuditScoring(
   let emilyB: number;
 
   if (isAmara) {
-    // Aligned reference baseline for Amara Okoye
+    // Aligned reference baseline for Amara Okoye (78 vs 93)
     baseA = 78;
     baseB = 80;
     emilyA = 93;
     emilyB = 89;
-  } else if (isTariq) {
-    // Distinct data architecture profile
+  } else if (isSadiq) {
+    // Distinct data architecture profile for Sadiq Al-Mansoor (74 vs 88)
     baseA = 74;
     baseB = 76;
     emilyA = 88;
     emilyB = 85;
   } else if (isElena) {
-    // Distinct technical product profile
+    // Distinct technical product profile for Elena Vasiliev (81 vs 92)
     baseA = 81;
     baseB = 83;
     emilyA = 92;
@@ -73,12 +78,14 @@ export function computeAuditScoring(
     emilyB = Math.min(94, baseB + gap2);
   }
 
-  // 2. Compute individual variant scores
+  // 2. Compute individual variant scores and ensure baseline variant matches the current candidate
   const updatedVariants = variantsList.map((v) => {
     if (v.isBaseline) {
       const composite = Math.round((baseA + baseB) / 2);
       return {
         ...v,
+        name: features.name, // Guarantees baseline name matches candidate (e.g. Sadiq Al-Mansoor)
+        signal: features.demographicMarker || v.signal,
         score: composite,
         modelAScore: baseA,
         modelBScore: baseB
@@ -92,13 +99,17 @@ export function computeAuditScoring(
       scoreA = emilyA;
       scoreB = emilyB;
     } else if (v.name.includes('Michael') || v.name.includes('Chen')) {
-      // Intermediate variant
-      scoreA = Math.round((baseA + emilyA) / 2) + 1;
-      scoreB = Math.round((baseB + emilyB) / 2) + 1;
+      scoreA = Math.round((baseA + emilyA) / 2);
+      scoreB = Math.round((baseB + emilyB) / 2);
     } else if (v.name.includes('Kwame') || v.name.includes('Mensah')) {
-      // Intra-demographic gender comparator
       scoreA = baseA + 1;
       scoreB = baseB;
+    } else if (v.name.includes('David') || v.name.includes('Miller')) {
+      scoreA = emilyA - 2;
+      scoreB = emilyB;
+    } else if (v.name.includes('Sarah') || v.name.includes('Jenkins')) {
+      scoreA = emilyA - 2;
+      scoreB = emilyB - 1;
     } else {
       const vHash = v.name.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
       const varOffset = (vHash % 4);
@@ -136,7 +147,6 @@ export function computeAuditScoring(
   const avgDeltaPenalty = - Math.round(((modelAGap + modelBGap) / 2) * 10) / 10;
 
   // Feature Sensitivity percentages: Normalized to EXACTLY 100%
-  // 70% + 16% + 10% + 4% = 100%
   const sensitivityAttribution = [
     {
       name: 'Name / Identity Token Markers',
@@ -164,36 +174,46 @@ export function computeAuditScoring(
     }
   ];
 
-  // Recommendations with whole number / clean precision
-  const recommendations: Recommendation[] = [
-    {
-      id: 1,
-      title: '1. Make Achievements Measurable',
-      icon: 'data_object',
-      potentialPoints: 4,
-      currentSnippet: 'Worked on several structural and microservice backend projects.',
-      suggestedSnippet: 'Engineered scalable REST microservices handling 2.4M requests/day with 99.98% uptime using Node.js & Redis.',
-      applied: false
-    },
-    {
-      id: 2,
-      title: '2. Standardize Date & Section Tokens',
-      icon: 'calendar_month',
-      potentialPoints: 3,
-      currentSnippet: 'Experience — Remote Engineer (2022-Now)',
-      suggestedSnippet: 'Professional Experience: Senior Software Engineer | FinTech Systems | 03/2022 – Present',
-      applied: false
-    },
-    {
-      id: 3,
-      title: '3. Front-load Hard Tech Competencies',
-      icon: 'hub',
-      potentialPoints: 3,
-      currentSnippet: 'Skills: React, JavaScript, Go, cloud infrastructure, backend frameworks.',
-      suggestedSnippet: 'Categorize into distinct taxonomy tags (Languages: TypeScript, Go | Frameworks: Next.js, Django | Cloud: AWS Lambda, ECS).',
-      applied: false
-    }
-  ];
+  // Tailor recommendations directly to candidate discipline
+  let recommendations: Recommendation[];
+  if (isSadiq) {
+    recommendations = SADIQ_RECOMMENDATIONS.map((r) => ({ ...r, applied: false }));
+  } else if (isElena) {
+    recommendations = ELENA_RECOMMENDATIONS.map((r) => ({ ...r, applied: false }));
+  } else if (isAmara) {
+    recommendations = AMARA_RECOMMENDATIONS.map((r) => ({ ...r, applied: false }));
+  } else {
+    // Dynamic recommendations for custom uploads
+    recommendations = [
+      {
+        id: 1,
+        title: '1. Quantify Impact Metrics & Volume',
+        icon: 'data_object',
+        potentialPoints: 4,
+        currentSnippet: `Executed key responsibilities and initiatives across ${features.track}.`,
+        suggestedSnippet: `Delivered high-impact solutions boosting throughput by 28% and driving $1.2M annual operational efficiency with ${features.skills.slice(0, 2).join(' & ')}.`,
+        applied: false
+      },
+      {
+        id: 2,
+        title: '2. Standardize Career Timeline & Formatting',
+        icon: 'calendar_month',
+        potentialPoints: 3,
+        currentSnippet: `Experience — ${features.track} (${features.positionYears || 'Recent'})`,
+        suggestedSnippet: `Professional Experience: Senior Specialist | ${jobTarget.company || 'Enterprise Systems'} | ${features.positionYears || '01/2021 – Present'}`,
+        applied: false
+      },
+      {
+        id: 3,
+        title: '3. Front-load Targeted Core Competencies',
+        icon: 'hub',
+        potentialPoints: 3,
+        currentSnippet: `Skills: ${features.skills.slice(0, 4).join(', ')}.`,
+        suggestedSnippet: `Group into structured categories (Core: ${features.skills.slice(0, 3).join(', ')} | Tools: ${features.skills.slice(3, 6).join(', ') || 'Docker, Git, CI/CD'}).`,
+        applied: false
+      }
+    ];
+  }
 
   // Calculated elapsed time (3 variants × 2 models parallel asynchronous batch)
   const elapsedSeconds = 4.2;

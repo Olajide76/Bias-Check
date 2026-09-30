@@ -4,12 +4,16 @@ import { TabType } from '../types';
 
 interface OverviewScreenProps {
   onStartDemo: () => void;
+  onStartCandidate: (candidateKey: 'amara' | 'sadiq' | 'elena') => void;
+  onConfigureCandidate: (candidateKey: 'amara' | 'sadiq' | 'elena') => void;
   onStartCustom: () => void;
   onNavigate: (tab: TabType) => void;
 }
 
 export const OverviewScreen: React.FC<OverviewScreenProps> = ({
   onStartDemo,
+  onStartCandidate,
+  onConfigureCandidate,
   onStartCustom,
   onNavigate
 }) => {
@@ -252,7 +256,7 @@ export const OverviewScreen: React.FC<OverviewScreenProps> = ({
               Select a benchmark profile to inspect
             </h2>
             <p className="text-xs text-[#444651] mt-0.5">
-              New to the platform? Click any candidate below to explore their audit results:
+              Click any candidate below to run their specific audit and view their tailored results:
             </p>
           </div>
           <button
@@ -264,74 +268,131 @@ export const OverviewScreen: React.FC<OverviewScreenProps> = ({
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <button
-            type="button"
-            onClick={onStartDemo}
-            className="p-4 rounded-xl bg-[#faf8ff] hover:bg-[#eaedff]/60 border border-[#eaedff] hover:border-[#00236f]/40 text-left transition-all cursor-pointer flex flex-col justify-between gap-3 group"
-          >
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {/* Candidate 1: Amara Okoye */}
+          <div className="p-5 rounded-xl bg-[#faf8ff] border border-[#eaedff] flex flex-col justify-between gap-4">
             <div className="flex items-center gap-3">
               <img
                 src={AMARA_PHOTO_URL}
                 alt="Amara"
-                className="w-10 h-10 rounded-full object-cover border border-[#eaedff]"
+                className="w-11 h-11 rounded-full object-cover border border-[#eaedff]"
               />
               <div>
-                <strong className="text-xs sm:text-sm font-bold text-[#131b2e] block group-hover:text-[#00236f]">
+                <strong className="text-sm font-bold text-[#131b2e] block">
                   Amara Okoye
                 </strong>
                 <span className="text-xs text-[#444651]">Senior Full-Stack Eng</span>
+                <span className="text-[10px] text-[#757682] block">Fintech Core Systems</span>
               </div>
             </div>
-            <div className="flex items-center justify-between text-xs pt-2 border-t border-[#eaedff]">
-              <span className="font-['JetBrains_Mono'] text-[#ba1a1a] font-bold">-15 pts gap</span>
-              <span className="font-['JetBrains_Mono'] text-[11px] text-[#00236f]">Run Audit →</span>
-            </div>
-          </button>
 
-          <button
-            type="button"
-            onClick={onStartCustom}
-            className="p-4 rounded-xl bg-[#faf8ff] hover:bg-[#eaedff]/60 border border-[#eaedff] hover:border-[#00236f]/40 text-left transition-all cursor-pointer flex flex-col justify-between gap-3 group"
-          >
+            <div className="p-2.5 rounded-lg bg-white border border-[#eaedff] flex justify-between items-center text-xs">
+              <span className="text-[#444651]">Score: <strong className="text-[#ba1a1a]">78</strong> vs 93</span>
+              <span className="font-['JetBrains_Mono'] font-bold text-[#ba1a1a] bg-[#ffdad6] px-1.5 py-0.5 rounded text-[11px]">
+                -15 pts gap
+              </span>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={() => onStartCandidate('amara')}
+                className="w-full py-2.5 px-3 rounded-lg bg-[#00236f] text-white text-xs font-['JetBrains_Mono'] font-semibold hover:bg-[#1e3a8a] transition flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
+              >
+                <span>Run Audit for Amara</span>
+                <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => onConfigureCandidate('amara')}
+                className="w-full py-1.5 px-2 rounded-lg bg-white text-[#444651] hover:text-[#00236f] text-[11px] font-['JetBrains_Mono'] transition text-center cursor-pointer border border-[#eaedff]"
+              >
+                Customize Criteria
+              </button>
+            </div>
+          </div>
+
+          {/* Candidate 2: Sadiq Al-Mansoor */}
+          <div className="p-5 rounded-xl bg-[#faf8ff] border border-[#eaedff] flex flex-col justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-[#00236f] text-white flex items-center justify-center font-['JetBrains_Mono'] text-xs font-bold">
-                TM
+              <div className="w-11 h-11 rounded-full bg-[#00236f] text-white flex items-center justify-center font-['JetBrains_Mono'] text-sm font-bold shadow-xs">
+                SA
               </div>
               <div>
-                <strong className="text-xs sm:text-sm font-bold text-[#131b2e] block group-hover:text-[#00236f]">
-                  Tariq Al-Mansoor
+                <strong className="text-sm font-bold text-[#131b2e] block">
+                  Sadiq Al-Mansoor
                 </strong>
                 <span className="text-xs text-[#444651]">Data Platform Architect</span>
+                <span className="text-[10px] text-[#757682] block">Streaming & Lakehouse</span>
               </div>
             </div>
-            <div className="flex items-center justify-between text-xs pt-2 border-t border-[#eaedff]">
-              <span className="font-['JetBrains_Mono'] text-[#ba1a1a] font-bold">-11 pts gap</span>
-              <span className="font-['JetBrains_Mono'] text-[11px] text-[#00236f]">Configure →</span>
-            </div>
-          </button>
 
-          <button
-            type="button"
-            onClick={onStartCustom}
-            className="p-4 rounded-xl bg-[#faf8ff] hover:bg-[#eaedff]/60 border border-[#eaedff] hover:border-[#00236f]/40 text-left transition-all cursor-pointer flex flex-col justify-between gap-3 group"
-          >
+            <div className="p-2.5 rounded-lg bg-white border border-[#eaedff] flex justify-between items-center text-xs">
+              <span className="text-[#444651]">Score: <strong className="text-[#ba1a1a]">74</strong> vs 88</span>
+              <span className="font-['JetBrains_Mono'] font-bold text-[#ba1a1a] bg-[#ffdad6] px-1.5 py-0.5 rounded text-[11px]">
+                -14 pts gap
+              </span>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={() => onStartCandidate('sadiq')}
+                className="w-full py-2.5 px-3 rounded-lg bg-[#00236f] text-white text-xs font-['JetBrains_Mono'] font-semibold hover:bg-[#1e3a8a] transition flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
+              >
+                <span>Run Audit for Sadiq</span>
+                <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => onConfigureCandidate('sadiq')}
+                className="w-full py-1.5 px-2 rounded-lg bg-white text-[#444651] hover:text-[#00236f] text-[11px] font-['JetBrains_Mono'] transition text-center cursor-pointer border border-[#eaedff]"
+              >
+                Customize Criteria
+              </button>
+            </div>
+          </div>
+
+          {/* Candidate 3: Elena Vasiliev */}
+          <div className="p-5 rounded-xl bg-[#faf8ff] border border-[#eaedff] flex flex-col justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-[#004942] text-white flex items-center justify-center font-['JetBrains_Mono'] text-xs font-bold">
+              <div className="w-11 h-11 rounded-full bg-[#004942] text-white flex items-center justify-center font-['JetBrains_Mono'] text-sm font-bold shadow-xs">
                 EV
               </div>
               <div>
-                <strong className="text-xs sm:text-sm font-bold text-[#131b2e] block group-hover:text-[#00236f]">
+                <strong className="text-sm font-bold text-[#131b2e] block">
                   Elena Vasiliev
                 </strong>
                 <span className="text-xs text-[#444651]">Technical Product Lead</span>
+                <span className="text-[10px] text-[#757682] block">Payments & Funnels</span>
               </div>
             </div>
-            <div className="flex items-center justify-between text-xs pt-2 border-t border-[#eaedff]">
-              <span className="font-['JetBrains_Mono'] text-[#ba1a1a] font-bold">-9 pts gap</span>
-              <span className="font-['JetBrains_Mono'] text-[11px] text-[#00236f]">Configure →</span>
+
+            <div className="p-2.5 rounded-lg bg-white border border-[#eaedff] flex justify-between items-center text-xs">
+              <span className="text-[#444651]">Score: <strong className="text-[#ba1a1a]">81</strong> vs 92</span>
+              <span className="font-['JetBrains_Mono'] font-bold text-[#ba1a1a] bg-[#ffdad6] px-1.5 py-0.5 rounded text-[11px]">
+                -11 pts gap
+              </span>
             </div>
-          </button>
+
+            <div className="flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={() => onStartCandidate('elena')}
+                className="w-full py-2.5 px-3 rounded-lg bg-[#00236f] text-white text-xs font-['JetBrains_Mono'] font-semibold hover:bg-[#1e3a8a] transition flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
+              >
+                <span>Run Audit for Elena</span>
+                <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => onConfigureCandidate('elena')}
+                className="w-full py-1.5 px-2 rounded-lg bg-white text-[#444651] hover:text-[#00236f] text-[11px] font-['JetBrains_Mono'] transition text-center cursor-pointer border border-[#eaedff]"
+              >
+                Customize Criteria
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 

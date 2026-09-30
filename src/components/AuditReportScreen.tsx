@@ -417,7 +417,7 @@ export const AuditReportScreen: React.FC<AuditReportScreenProps> = ({
           className="flex-1 py-3.5 px-5 rounded-xl bg-[#00236f] text-white font-['JetBrains_Mono'] text-xs sm:text-sm font-semibold hover:bg-[#1e3a8a] transition flex items-center justify-center gap-2 cursor-pointer shadow-xs"
         >
           <span className="material-symbols-outlined text-[18px]">print</span>
-          <span>Official Audit Certificate</span>
+          <span>Print / Download Certificate</span>
         </button>
 
         <button
