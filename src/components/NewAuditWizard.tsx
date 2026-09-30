@@ -3,7 +3,8 @@ import { CounterfactualVariant, ExtractedFeatures, JobTarget } from '../types';
 import {
   DEFAULT_EXTRACTED_FEATURES,
   DEFAULT_JOB_TARGET,
-  DEFAULT_VARIANTS
+  DEFAULT_VARIANTS,
+  AMARA_PHOTO_URL
 } from '../data/mockData';
 
 interface NewAuditWizardProps {
@@ -16,16 +17,11 @@ interface NewAuditWizardProps {
 
 export const NewAuditWizard: React.FC<NewAuditWizardProps> = ({ onRunAudit }) => {
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
-  const [fileFormat, setFileFormat] = useState<'PDF' | 'DOCX' | 'TXT'>('PDF');
   const [resumeFileName, setResumeFileName] = useState('Amara_Okoye_Senior_SWE_Resume.pdf');
   const [features, setFeatures] = useState<ExtractedFeatures>(DEFAULT_EXTRACTED_FEATURES);
   const [jobTarget, setJobTarget] = useState<JobTarget>(DEFAULT_JOB_TARGET);
   const [variants, setVariants] = useState<CounterfactualVariant[]>(DEFAULT_VARIANTS);
-  const [ethicsAccepted, setEthicsAccepted] = useState(false);
-  const [isExtractionExpanded, setIsExtractionExpanded] = useState(true);
-  const [isCustomUploadModalOpen, setIsCustomUploadModalOpen] = useState(false);
-  const [customNameInput, setCustomNameInput] = useState('');
-  const [customSignalInput, setCustomSignalInput] = useState('');
+  const [ethicsAccepted, setEthicsAccepted] = useState(true);
 
   const toggleVariant = (id: string) => {
     setVariants((prev) =>
@@ -37,625 +33,500 @@ export const NewAuditWizard: React.FC<NewAuditWizardProps> = ({ onRunAudit }) =>
     const file = e.target.files?.[0];
     if (file) {
       setResumeFileName(file.name);
-      // derive name or keep features
       const baseName = file.name.replace(/\.[^/.]+$/, '').replace(/_/g, ' ');
       setFeatures((prev) => ({
         ...prev,
-        name: baseName.includes(' ') ? baseName : 'Candidate Profile'
+        name: baseName.includes(' ') ? baseName : 'Candidate Profile',
+        summary: `Custom uploaded resume: ${file.name}`
       }));
     }
   };
 
-  const activeVariantsCount = variants.filter((v) => v.active && !v.isBaseline).length;
+  const selectProfile = (profile: 'amara' | 'tariq' | 'elena') => {
+    if (profile === 'amara') {
+      setResumeFileName('Amara_Okoye_Senior_SWE_Resume.pdf');
+      setFeatures({
+        name: 'Amara Okoye',
+        demographicMarker: 'Female / West-African',
+        track: 'Full-Stack Engineer',
+        experienceLevel: 'Senior (5+ years)',
+        summary: '5+ years building scalable distributed web services and event-driven microservices.',
+        skills: ['TypeScript', 'Python', 'React', 'PostgreSQL', 'Docker', 'Redis'],
+        matchedSkillsCount: 14,
+        positionsCount: 3,
+        positionYears: '2019 – Present',
+        education: 'B.Sc. Computer Science',
+        educationTier: 'Accredited University'
+      });
+      setJobTarget({
+        ...DEFAULT_JOB_TARGET,
+        title: 'Staff Software Engineer / Distributed Systems',
+        company: 'Fintech Global Ltd'
+      });
+    } else if (profile === 'tariq') {
+      setResumeFileName('Tariq_Al_Mansoor_Data_Lead.pdf');
+      setFeatures({
+        name: 'Tariq Al-Mansoor',
+        demographicMarker: 'Male / Middle-Eastern',
+        track: 'Data Platform Architect',
+        experienceLevel: 'Staff (7+ years)',
+        summary: 'Specializing in real-time Apache Flink, Snowflake data lakes, and streaming systems.',
+        skills: ['Python', 'SQL', 'Apache Spark', 'Kafka', 'Snowflake', 'Airflow'],
+        matchedSkillsCount: 16,
+        positionsCount: 4,
+        positionYears: '2017 – Present',
+        education: 'M.Sc. Information Systems',
+        educationTier: 'Accredited University'
+      });
+      setJobTarget({
+        ...DEFAULT_JOB_TARGET,
+        title: 'Principal Data Platform Engineer',
+        company: 'Fintech Global Ltd'
+      });
+    } else {
+      setResumeFileName('Elena_Vasiliev_PM_Resume.pdf');
+      setFeatures({
+        name: 'Elena Vasiliev',
+        demographicMarker: 'Female / Eastern-European',
+        track: 'Technical Product Lead',
+        experienceLevel: 'Lead (6+ years)',
+        summary: 'Scaling fintech payment conversions, developer SDKs, and international compliance.',
+        skills: ['Product Strategy', 'Fintech APIs', 'SQL', 'A/B Testing', 'System Architecture'],
+        matchedSkillsCount: 12,
+        positionsCount: 3,
+        positionYears: '2018 – Present',
+        education: 'B.Sc. Business & Computer Science',
+        educationTier: 'Accredited University'
+      });
+      setJobTarget({
+        ...DEFAULT_JOB_TARGET,
+        title: 'Lead Technical Product Manager - Ledger',
+        company: 'Fintech Global Ltd'
+      });
+    }
+  };
+
+  const handleStartAudit = () => {
+    onRunAudit({
+      features,
+      jobTarget,
+      variants
+    });
+  };
+
+  const handleQuickRun = (profile?: 'amara' | 'tariq' | 'elena') => {
+    if (profile) {
+      selectProfile(profile);
+    }
+    // Give state tick if needed or run with resolved config
+    setTimeout(() => {
+      onRunAudit({
+        features,
+        jobTarget,
+        variants
+      });
+    }, 50);
+  };
 
   return (
-    <div className="flex flex-col w-full pb-24 max-w-xl mx-auto">
-      {/* Protocol Pipeline Step Ribbon */}
-      <div className="px-4 py-3 bg-[#f2f3ff] border-b border-[#eaedff] flex flex-col gap-2.5">
-        <div className="flex items-center justify-between">
-          <span className="font-['JetBrains_Mono'] text-[11px] text-[#444651] uppercase tracking-wider font-semibold">
-            Protocol Pipeline
+    <div className="flex flex-col w-full pb-28 md:pb-12 max-w-4xl mx-auto px-4 sm:px-6 py-6 gap-6">
+      {/* Friendly Step Indicator with Direct Clickability */}
+      <div className="bg-white rounded-2xl p-4 sm:p-5 border border-[#eaedff] shadow-xs flex flex-col gap-3">
+        <div className="flex justify-between items-center text-xs font-['JetBrains_Mono']">
+          <span className="text-[#757682] uppercase tracking-wider">
+            Step {currentStep} of 3
           </span>
-          <span className="font-['JetBrains_Mono'] text-xs text-[#00236f] font-semibold flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-[#fe932c]"></span>
-            <span>Step {currentStep} of 3</span>
+          <span className="text-[#00236f] font-bold">
+            {currentStep === 1 && '1. Choose Candidate & Resume'}
+            {currentStep === 2 && '2. Set Target Job Criteria'}
+            {currentStep === 3 && '3. Review Comparison Variants'}
           </span>
         </div>
 
-        {/* 3 Step Progress Bars */}
-        <div className="grid grid-cols-3 gap-1.5">
-          <div
-            className={`h-1.5 rounded-full transition-all duration-300 ${
-              currentStep >= 1 ? 'bg-[#00236f]' : 'bg-[#dae2fd]'
-            }`}
-          ></div>
-          <div
-            className={`h-1.5 rounded-full transition-all duration-300 ${
-              currentStep >= 2 ? 'bg-[#00236f]' : 'bg-[#dae2fd]'
-            }`}
-          ></div>
-          <div
-            className={`h-1.5 rounded-full transition-all duration-300 ${
-              currentStep >= 3 ? 'bg-[#00236f]' : 'bg-[#dae2fd]'
-            }`}
-          ></div>
-        </div>
-
-        {/* Step Buttons */}
-        <div className="flex justify-between items-center text-center pt-0.5">
+        {/* Step Buttons for Easy Navigation */}
+        <div className="grid grid-cols-3 gap-2">
           <button
             onClick={() => setCurrentStep(1)}
-            className="flex items-center gap-1.5 focus:outline-none"
+            className={`py-2 px-3 rounded-xl text-xs font-['JetBrains_Mono'] font-medium transition-all text-left flex items-center gap-2 cursor-pointer ${
+              currentStep === 1
+                ? 'bg-[#00236f] text-white font-bold shadow-xs'
+                : currentStep > 1
+                ? 'bg-[#f2f3ff] text-[#00236f] hover:bg-[#eaedff]'
+                : 'bg-[#faf8ff] text-[#757682]'
+            }`}
           >
-            <span
-              className={`w-5 h-5 rounded-full font-['JetBrains_Mono'] text-[11px] flex items-center justify-center font-bold transition-all ${
-                currentStep === 1
-                  ? 'bg-[#00236f] text-white shadow-xs'
-                  : currentStep > 1
-                  ? 'bg-[#004942] text-white'
-                  : 'bg-[#dae2fd] text-[#444651]'
-              }`}
-            >
-              1
-            </span>
-            <span
-              className={`font-['JetBrains_Mono'] text-xs ${
-                currentStep === 1 ? 'text-[#00236f] font-bold' : 'text-[#444651]'
-              }`}
-            >
-              Resume
-            </span>
+            <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-[10px]">1</span>
+            <span className="truncate">Resume</span>
           </button>
 
           <button
             onClick={() => setCurrentStep(2)}
-            className="flex items-center gap-1.5 focus:outline-none"
+            className={`py-2 px-3 rounded-xl text-xs font-['JetBrains_Mono'] font-medium transition-all text-left flex items-center gap-2 cursor-pointer ${
+              currentStep === 2
+                ? 'bg-[#00236f] text-white font-bold shadow-xs'
+                : currentStep > 2
+                ? 'bg-[#f2f3ff] text-[#00236f] hover:bg-[#eaedff]'
+                : 'bg-[#faf8ff] text-[#757682]'
+            }`}
           >
-            <span
-              className={`w-5 h-5 rounded-full font-['JetBrains_Mono'] text-[11px] flex items-center justify-center font-bold transition-all ${
-                currentStep === 2
-                  ? 'bg-[#00236f] text-white shadow-xs'
-                  : currentStep > 2
-                  ? 'bg-[#004942] text-white'
-                  : 'bg-[#dae2fd] text-[#444651]'
-              }`}
-            >
-              2
-            </span>
-            <span
-              className={`font-['JetBrains_Mono'] text-xs ${
-                currentStep === 2 ? 'text-[#00236f] font-bold' : 'text-[#444651]'
-              }`}
-            >
-              Job Match
-            </span>
+            <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-[10px]">2</span>
+            <span className="truncate">Target Job</span>
           </button>
 
           <button
             onClick={() => setCurrentStep(3)}
-            className="flex items-center gap-1.5 focus:outline-none"
+            className={`py-2 px-3 rounded-xl text-xs font-['JetBrains_Mono'] font-medium transition-all text-left flex items-center gap-2 cursor-pointer ${
+              currentStep === 3
+                ? 'bg-[#00236f] text-white font-bold shadow-xs'
+                : 'bg-[#faf8ff] text-[#757682]'
+            }`}
           >
-            <span
-              className={`w-5 h-5 rounded-full font-['JetBrains_Mono'] text-[11px] flex items-center justify-center font-bold transition-all ${
-                currentStep === 3
-                  ? 'bg-[#00236f] text-white shadow-xs'
-                  : 'bg-[#dae2fd] text-[#444651]'
-              }`}
-            >
-              3
-            </span>
-            <span
-              className={`font-['JetBrains_Mono'] text-xs ${
-                currentStep === 3 ? 'text-[#00236f] font-bold' : 'text-[#444651]'
-              }`}
-            >
-              Variants
-            </span>
+            <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-[10px]">3</span>
+            <span className="truncate">Comparison</span>
           </button>
         </div>
       </div>
 
-      <div className="p-4 flex flex-col gap-4">
-        {/* STEP 1: SOURCE INGESTION */}
-        {currentStep === 1 && (
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="font-['Hanken_Grotesk'] text-xl text-[#131b2e] font-bold tracking-tight">
-                  Source Ingestion
-                </h2>
-                <p className="text-xs text-[#444651]">
-                  Validate canonical resume tokenization & semantic structures
-                </p>
-              </div>
-              <div className="flex items-center gap-1 px-2 py-1 rounded bg-[#eaedff] text-[#00312c] font-['JetBrains_Mono'] text-[11px] font-medium shrink-0">
-                <span className="material-symbols-outlined text-[15px] text-[#004942]">
-                  verified_user
-                </span>
-                <span>ISO/IEC 29115</span>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl p-4 shadow-xs border border-[#eaedff] flex flex-col gap-4">
-              <div className="flex items-center justify-between">
-                <div className="flex gap-1 p-0.5 bg-[#eaedff] rounded-lg">
-                  {(['PDF', 'DOCX', 'TXT'] as const).map((fmt) => (
-                    <button
-                      key={fmt}
-                      onClick={() => setFileFormat(fmt)}
-                      className={`px-3 py-1 rounded font-['JetBrains_Mono'] text-xs font-semibold transition-all ${
-                        fileFormat === fmt
-                          ? 'bg-white text-[#00236f] shadow-xs'
-                          : 'text-[#444651] hover:text-[#131b2e]'
-                      }`}
-                    >
-                      {fmt}
-                    </button>
-                  ))}
-                </div>
-                <span className="font-['JetBrains_Mono'] text-xs text-[#444651]">Max 10MB</span>
-              </div>
-
-              {/* Uploaded Card */}
-              <div className="p-4 rounded-xl bg-[#f2f3ff] border border-[#eaedff] flex flex-col sm:flex-row items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-[#1e3a8a] text-white flex items-center justify-center shrink-0 shadow-xs">
-                  <span className="material-symbols-outlined text-[26px]">description</span>
-                </div>
-                <div className="flex-1 min-w-0 text-center sm:text-left">
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-1">
-                    <span className="font-['Hanken_Grotesk'] text-base text-[#131b2e] font-bold truncate">
-                      {resumeFileName}
-                    </span>
-                    <span className="font-['JetBrains_Mono'] text-xs text-[#444651]">142 KB</span>
-                  </div>
-                  <div className="flex items-center justify-center sm:justify-start gap-1.5 mt-0.5">
-                    <span className="w-2 h-2 rounded-full bg-[#004942]"></span>
-                    <span className="font-['JetBrains_Mono'] text-xs text-[#004942] font-semibold">
-                      ✓ Resume parsed (9 Sections detected)
-                    </span>
-                  </div>
-                </div>
-
-                <label className="px-3 py-1.5 rounded-lg bg-white text-[#444651] hover:text-[#00236f] border border-[#eaedff] transition font-['JetBrains_Mono'] text-xs flex items-center gap-1.5 shadow-xs shrink-0 cursor-pointer">
-                  <span className="material-symbols-outlined text-[16px]">swap_horiz</span>
-                  <span>Replace</span>
-                  <input
-                    type="file"
-                    accept=".pdf,.docx,.txt"
-                    onChange={handleCustomUpload}
-                    className="hidden"
-                  />
-                </label>
-              </div>
-
-              {/* Extracted Semantic Features Accordion */}
-              <div className="bg-[#eaedff]/60 rounded-xl p-3.5 border border-[#dae2fd] flex flex-col gap-3">
-                <button
-                  type="button"
-                  className="flex items-center justify-between cursor-pointer w-full text-left"
-                  onClick={() => setIsExtractionExpanded(!isExtractionExpanded)}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[#00236f] text-[20px]">
-                      fact_check
-                    </span>
-                    <span className="font-['JetBrains_Mono'] text-xs text-[#00236f] font-bold">
-                      Extracted Semantic Features
-                    </span>
-                  </div>
-                  <span
-                    className={`material-symbols-outlined text-[#444651] text-[20px] transition-transform duration-200 ${
-                      isExtractionExpanded ? '' : '-rotate-90'
-                    }`}
-                  >
-                    expand_more
-                  </span>
-                </button>
-
-                {isExtractionExpanded && (
-                  <div className="flex flex-col gap-3 pt-1">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                      <div className="bg-white p-3 rounded-lg border border-[#eaedff] flex flex-col">
-                        <span className="font-['JetBrains_Mono'] text-[10px] text-[#444651] uppercase">
-                          Target Identity Anchor
-                        </span>
-                        <span className="font-['Hanken_Grotesk'] text-sm font-bold text-[#131b2e]">
-                          {features.name}
-                        </span>
-                        <span className="font-['JetBrains_Mono'] text-xs text-[#904d00] font-medium">
-                          Demographic marker: {features.demographicMarker}
-                        </span>
-                      </div>
-                      <div className="bg-white p-3 rounded-lg border border-[#eaedff] flex flex-col">
-                        <span className="font-['JetBrains_Mono'] text-[10px] text-[#444651] uppercase">
-                          Extracted Track
-                        </span>
-                        <span className="font-['Hanken_Grotesk'] text-sm font-bold text-[#131b2e]">
-                          {features.track}
-                        </span>
-                        <span className="font-['JetBrains_Mono'] text-xs text-[#444651]">
-                          {features.experienceLevel}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="bg-white p-3 rounded-lg border border-[#eaedff] flex flex-col gap-1">
-                      <span className="font-['JetBrains_Mono'] text-[10px] text-[#444651] uppercase">
-                        Executive Summary Chunk
-                      </span>
-                      <p className="text-xs text-[#131b2e] italic bg-[#faf8ff] p-2 rounded border border-[#eaedff]">
-                        "{features.summary}"
-                      </p>
-                    </div>
-
-                    <div className="bg-white p-3 rounded-lg border border-[#eaedff] flex flex-col gap-1.5">
-                      <span className="font-['JetBrains_Mono'] text-[10px] text-[#444651] uppercase">
-                        Core Skill Taxonomy Tokens
-                      </span>
-                      <div className="flex flex-wrap gap-1">
-                        {features.skills.map((skill) => (
-                          <span
-                            key={skill}
-                            className="px-2 py-0.5 rounded bg-[#eaedff] text-[#00236f] font-['JetBrains_Mono'] text-[11px] font-semibold"
-                          >
-                            {skill}
-                          </span>
-                        ))}
-                        <span className="px-2 py-0.5 rounded bg-[#dae2fd] text-[#004942] font-['JetBrains_Mono'] text-[11px] font-medium">
-                          +{features.matchedSkillsCount} matched
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2.5">
-                      <div className="bg-white p-3 rounded-lg border border-[#eaedff]">
-                        <span className="font-['JetBrains_Mono'] text-[10px] text-[#444651] uppercase block">
-                          Positions Parsed
-                        </span>
-                        <div className="font-['Hanken_Grotesk'] text-base font-bold text-[#131b2e]">
-                          {features.positionsCount} Roles
-                        </div>
-                        <span className="font-['JetBrains_Mono'] text-xs text-[#444651]">
-                          {features.positionYears}
-                        </span>
-                      </div>
-                      <div className="bg-white p-3 rounded-lg border border-[#eaedff]">
-                        <span className="font-['JetBrains_Mono'] text-[10px] text-[#444651] uppercase block">
-                          Academic Credential
-                        </span>
-                        <div className="font-['Hanken_Grotesk'] text-sm font-bold text-[#131b2e] truncate">
-                          {features.education}
-                        </div>
-                        <span className="font-['JetBrains_Mono'] text-xs text-[#004942] font-semibold">
-                          {features.educationTier}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Action */}
-              <div className="flex justify-end pt-1">
-                <button
-                  onClick={() => setCurrentStep(2)}
-                  className="w-full sm:w-auto px-6 py-3 bg-[#00236f] text-white rounded-lg font-['JetBrains_Mono'] text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 shadow-sm hover:bg-[#1e3a8a] active:scale-[0.98] transition"
-                >
-                  <span>Proceed to Job Matching</span>
-                  <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* STEP 2: BENCHMARK TARGET */}
-        {currentStep === 2 && (
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="font-['Hanken_Grotesk'] text-xl text-[#131b2e] font-bold tracking-tight">
-                  Benchmark Target
-                </h2>
-                <p className="text-xs text-[#444651]">
-                  Align model evaluation parameters to explicit employer screening criteria
-                </p>
-              </div>
-              <div className="flex items-center gap-1 px-2 py-1 rounded bg-[#eaedff] text-[#444651] font-['JetBrains_Mono'] text-[11px] font-medium shrink-0">
-                <span>Preset: Lever/Workday</span>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl p-4 shadow-xs border border-[#eaedff] flex flex-col gap-4">
-              <div className="flex flex-col gap-1.5">
-                <label className="font-['JetBrains_Mono'] text-xs text-[#131b2e] font-semibold">
-                  Target Position Title
-                </label>
-                <div className="flex items-center bg-[#f2f3ff] rounded-lg px-3 py-2 border border-[#eaedff]">
-                  <span className="material-symbols-outlined text-[#00236f] text-[20px] mr-2 shrink-0">
-                    badge
-                  </span>
-                  <input
-                    className="bg-transparent text-sm text-[#131b2e] focus:outline-none w-full font-medium"
-                    type="text"
-                    value={jobTarget.title}
-                    onChange={(e) =>
-                      setJobTarget((prev) => ({ ...prev, title: e.target.value }))
-                    }
-                  />
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-1.5">
-                <label className="font-['JetBrains_Mono'] text-xs text-[#131b2e] font-semibold">
-                  Hiring Organization / Context
-                </label>
-                <div className="flex items-center bg-[#f2f3ff] rounded-lg px-3 py-2 border border-[#eaedff]">
-                  <span className="material-symbols-outlined text-[#00236f] text-[20px] mr-2 shrink-0">
-                    apartment
-                  </span>
-                  <input
-                    className="bg-transparent text-sm text-[#131b2e] focus:outline-none w-full font-medium"
-                    type="text"
-                    value={jobTarget.company}
-                    onChange={(e) =>
-                      setJobTarget((prev) => ({ ...prev, company: e.target.value }))
-                    }
-                  />
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-1.5">
-                <div className="flex items-center justify-between">
-                  <label className="font-['JetBrains_Mono'] text-xs text-[#131b2e] font-semibold">
-                    Job Specification Corpus
-                  </label>
-                  <span className="font-['JetBrains_Mono'] text-[11px] text-[#444651]">
-                    {jobTarget.description.length} chars • {jobTarget.requiredTokenCount} Required Tokens
-                  </span>
-                </div>
-                <div className="relative bg-[#f2f3ff] rounded-lg p-3 border border-[#eaedff]">
-                  <textarea
-                    className="bg-transparent font-['JetBrains_Mono'] text-xs text-[#131b2e] w-full focus:outline-none resize-none leading-relaxed"
-                    rows={5}
-                    value={jobTarget.description}
-                    onChange={(e) =>
-                      setJobTarget((prev) => ({ ...prev, description: e.target.value }))
-                    }
-                  />
-                </div>
-              </div>
-
-              {/* Keyword Saturation */}
-              <div className="p-3 bg-[#eaedff] rounded-lg flex flex-col gap-2 border border-[#dae2fd]">
-                <div className="flex items-center justify-between font-['JetBrains_Mono'] text-xs">
-                  <span className="text-[#444651] uppercase font-medium">
-                    ATS Baseline Keyword Saturation
-                  </span>
-                  <span className="text-[#004942] font-bold">{jobTarget.matchScore}% Correlation</span>
-                </div>
-                <div className="w-full bg-[#dae2fd] rounded-full h-2">
-                  <div
-                    className="bg-[#004942] h-2 rounded-full transition-all duration-500"
-                    style={{ width: `${jobTarget.matchScore}%` }}
-                  ></div>
-                </div>
-                <div className="flex flex-wrap gap-1.5 mt-1">
-                  {jobTarget.matchedKeywords.map((item) => (
-                    <span
-                      key={item.keyword}
-                      className={`px-2 py-0.5 rounded font-['JetBrains_Mono'] text-[11px] font-semibold border ${
-                        item.status === 'matched'
-                          ? 'bg-white text-[#004942] border-[#89f5e7]'
-                          : 'bg-white text-[#904d00] border-[#ffdcc3]'
-                      }`}
-                    >
-                      {item.status === 'matched' ? '✓ ' : '⚠ '}
-                      {item.keyword} ({item.percentage}%)
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Navigation */}
-              <div className="flex items-center justify-between pt-1">
-                <button
-                  onClick={() => setCurrentStep(1)}
-                  className="px-4 py-2.5 text-[#444651] hover:text-[#131b2e] font-['JetBrains_Mono'] text-xs font-semibold transition"
-                >
-                  Back
-                </button>
-                <button
-                  onClick={() => setCurrentStep(3)}
-                  className="px-6 py-3 bg-[#00236f] text-white rounded-lg font-['JetBrains_Mono'] text-xs sm:text-sm font-semibold flex items-center gap-2 shadow-sm hover:bg-[#1e3a8a] active:scale-[0.98] transition"
-                >
-                  <span>Configure Counterfactuals</span>
-                  <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* STEP 3: CONTROLLED VARIANT SUITE */}
-        {currentStep === 3 && (
-          <div className="flex flex-col gap-4">
+      {/* STEP 1: CHOOSE OR UPLOAD RESUME */}
+      {currentStep === 1 && (
+        <div className="bg-white rounded-2xl p-6 sm:p-7 border border-[#eaedff] shadow-xs flex flex-col gap-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
-              <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-[#904d00] text-[24px]">balance</span>
-                <h2 className="font-['Hanken_Grotesk'] text-xl text-[#131b2e] font-bold tracking-tight">
-                  Controlled Variant Suite
-                </h2>
-              </div>
-              <p className="text-xs text-[#444651] mt-0.5">
-                Isolate algorithmic sensitivity vectors via randomized demographic counterfactuals
+              <h2 className="font-['Hanken_Grotesk'] text-xl sm:text-2xl font-bold text-[#131b2e]">
+                Select a resume to evaluate
+              </h2>
+              <p className="text-xs sm:text-sm text-[#444651] mt-0.5">
+                Pick a benchmark profile for instant testing, or upload your own resume:
               </p>
             </div>
+            <button
+              onClick={() => handleQuickRun()}
+              className="px-4 py-2 rounded-xl bg-[#004942] text-white font-['JetBrains_Mono'] text-xs font-bold hover:bg-[#003833] transition flex items-center gap-1.5 self-start sm:self-auto cursor-pointer shadow-xs"
+            >
+              <span className="material-symbols-outlined text-[16px]">bolt</span>
+              <span>1-Click Quick Audit</span>
+            </button>
+          </div>
 
-            {/* Causal Pairwise Perturbation Method Banner */}
-            <div className="p-4 rounded-xl bg-[#e2e7ff] border border-[#dae2fd] flex flex-col gap-2">
-              <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-[#00236f] text-[20px]">science</span>
-                <span className="font-['JetBrains_Mono'] text-xs text-[#00236f] font-bold">
-                  Audit Methodology: Causal Pairwise Perturbation
-                </span>
-              </div>
-              <p className="text-xs text-[#131b2e] leading-relaxed">
-                To isolate the singular effect of identity proxies, BiasCheck keeps the resume substantive metrics <strong>100% identical</strong> while perturbing only canonical name tokens across recognized demographic axes.
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1">
-                <div className="p-2 rounded bg-white border border-[#dae2fd] flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[#004942] text-[18px] shrink-0">
-                    lock
-                  </span>
-                  <span className="font-['JetBrains_Mono'] text-[11px] text-[#131b2e] font-medium">
-                    Invariant: Experience, skills, tenure, dates
-                  </span>
-                </div>
-                <div className="p-2 rounded bg-white border border-[#dae2fd] flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[#904d00] text-[18px] shrink-0">
-                    tune
-                  </span>
-                  <span className="font-['JetBrains_Mono'] text-[11px] text-[#131b2e] font-medium">
-                    Manipulated: First/last name demographic signal
-                  </span>
-                </div>
-              </div>
-            </div>
+          {/* Quick 1-Click Profile Selection */}
+          <div className="flex flex-col gap-3">
+            <span className="text-xs font-['JetBrains_Mono'] text-[#757682] uppercase tracking-wider">
+              Quick Test Benchmark Profiles
+            </span>
 
-            {/* Counterfactual Cohort List */}
-            <div className="flex flex-col gap-2.5">
-              <div className="flex items-center justify-between">
-                <span className="font-['JetBrains_Mono'] text-xs text-[#444651] uppercase tracking-wider font-semibold">
-                  Configured Counterfactual Cohort ({variants.length})
-                </span>
-                <span className="font-['JetBrains_Mono'] text-xs text-[#00236f] font-medium">
-                  {activeVariantsCount} Active Variants + 1 Baseline
-                </span>
-              </div>
-
-              {variants.map((v) => (
-                <div
-                  key={v.id}
-                  className="bg-white rounded-xl p-3.5 shadow-xs border border-[#eaedff] flex flex-col gap-2.5"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`w-2.5 h-2.5 rounded-full ${
-                          v.isBaseline ? 'bg-[#00236f]' : 'bg-[#fe932c]'
-                        }`}
-                      ></span>
-                      <span className="font-['Hanken_Grotesk'] text-base font-bold text-[#131b2e]">
-                        {v.name}
-                      </span>
-                      <span
-                        className={`px-2 py-0.5 rounded font-['JetBrains_Mono'] text-[10px] font-bold ${
-                          v.isBaseline
-                            ? 'bg-[#eaedff] text-[#00236f]'
-                            : 'bg-[#dae2fd] text-[#444651]'
-                        }`}
-                      >
-                        {v.label}
-                      </span>
-                    </div>
-
-                    {v.isBaseline ? (
-                      <span className="font-['JetBrains_Mono'] text-xs text-[#444651]">
-                        Original Candidate
-                      </span>
-                    ) : (
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={v.active}
-                          onChange={() => toggleVariant(v.id)}
-                          className="sr-only peer"
-                        />
-                        <div className="w-9 h-5 bg-[#dae2fd] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#00236f]"></div>
-                      </label>
-                    )}
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-2 text-center py-1.5 bg-[#f2f3ff] rounded-lg border border-[#eaedff]">
-                    <div>
-                      <span className="font-['JetBrains_Mono'] text-[10px] text-[#444651] block">
-                        Signal
-                      </span>
-                      <span className="font-['JetBrains_Mono'] text-xs text-[#131b2e] font-semibold truncate block">
-                        {v.signal}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="font-['JetBrains_Mono'] text-[10px] text-[#444651] block">
-                        Substantive Text
-                      </span>
-                      <span className="font-['JetBrains_Mono'] text-xs text-[#004942] font-semibold block">
-                        {v.substantiveText}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="font-['JetBrains_Mono'] text-[10px] text-[#444651] block">
-                        Delta Test
-                      </span>
-                      <span
-                        className={`font-['JetBrains_Mono'] text-xs font-semibold block ${
-                          v.isBaseline ? 'text-[#00236f]' : v.active ? 'text-[#004942]' : 'text-[#757682]'
-                        }`}
-                      >
-                        {v.isBaseline ? 'Anchor Ref' : v.active ? 'Active' : 'Disabled'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Ethics Agreement */}
-            <div className="p-3 bg-[#f2f3ff] rounded-xl flex items-start gap-2.5 border border-[#eaedff]">
-              <input
-                id="ethicsAgreement"
-                type="checkbox"
-                checked={ethicsAccepted}
-                onChange={(e) => setEthicsAccepted(e.target.checked)}
-                className="mt-1 w-4 h-4 rounded text-[#00236f] focus:ring-[#00236f] bg-white cursor-pointer"
-              />
-              <label
-                htmlFor="ethicsAgreement"
-                className="text-xs text-[#131b2e] select-none cursor-pointer leading-relaxed"
-              >
-                <strong className="font-semibold text-[#00236f]">Ethical Research Disclosure:</strong> I
-                affirm these counterfactual variants will be executed solely for audit differential
-                measurements against simulated scoring endpoints and will not be utilized as deceptive
-                applicant submissions.
-              </label>
-            </div>
-
-            {/* Actions */}
-            <div className="flex items-center justify-between pt-1">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <button
-                onClick={() => setCurrentStep(2)}
-                className="px-4 py-2.5 text-[#444651] hover:text-[#131b2e] font-['JetBrains_Mono'] text-xs font-semibold transition"
-              >
-                Back
-              </button>
-
-              <button
-                disabled={!ethicsAccepted}
-                onClick={() => onRunAudit({ features, jobTarget, variants })}
-                className={`px-6 py-3 rounded-lg font-['JetBrains_Mono'] text-xs sm:text-sm font-semibold flex items-center gap-2 transition-all shadow-sm ${
-                  ethicsAccepted
-                    ? 'bg-[#00236f] text-white hover:bg-[#1e3a8a] active:scale-[0.98] cursor-pointer'
-                    : 'bg-[#dae2fd] text-[#444651] cursor-not-allowed opacity-75'
+                type="button"
+                onClick={() => selectProfile('amara')}
+                className={`p-4 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between gap-3 ${
+                  features.name === 'Amara Okoye'
+                    ? 'bg-[#eaedff]/80 border-[#00236f] shadow-xs ring-2 ring-[#00236f]/10'
+                    : 'bg-[#faf8ff] border-[#eaedff] hover:border-[#00236f]/40'
                 }`}
               >
-                <span className="material-symbols-outlined text-[18px]">biotech</span>
-                <span>Run Bias Audit ({activeVariantsCount} Variants × 2 Models)</span>
+                <div className="flex items-center gap-3">
+                  <img
+                    src={AMARA_PHOTO_URL}
+                    alt="Amara"
+                    className="w-10 h-10 rounded-full object-cover border border-[#eaedff]"
+                  />
+                  <div>
+                    <strong className="text-xs sm:text-sm font-bold text-[#131b2e] block">Amara Okoye</strong>
+                    <span className="text-xs text-[#444651]">Full-Stack Eng</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between text-[11px] pt-2 border-t border-[#eaedff]/60">
+                  <span className="text-[#00236f] font-mono">5+ yrs exp</span>
+                  <span className="font-semibold text-[#004942]">Fintech Preset</span>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => selectProfile('tariq')}
+                className={`p-4 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between gap-3 ${
+                  features.name === 'Tariq Al-Mansoor'
+                    ? 'bg-[#eaedff]/80 border-[#00236f] shadow-xs ring-2 ring-[#00236f]/10'
+                    : 'bg-[#faf8ff] border-[#eaedff] hover:border-[#00236f]/40'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-[#00236f] text-white flex items-center justify-center font-['JetBrains_Mono'] text-xs font-bold">
+                    TM
+                  </div>
+                  <div>
+                    <strong className="text-xs sm:text-sm font-bold text-[#131b2e] block">Tariq Al-Mansoor</strong>
+                    <span className="text-xs text-[#444651]">Data Platform</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between text-[11px] pt-2 border-t border-[#eaedff]/60">
+                  <span className="text-[#00236f] font-mono">7+ yrs exp</span>
+                  <span className="font-semibold text-[#004942]">Big Data Preset</span>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => selectProfile('elena')}
+                className={`p-4 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between gap-3 ${
+                  features.name === 'Elena Vasiliev'
+                    ? 'bg-[#eaedff]/80 border-[#00236f] shadow-xs ring-2 ring-[#00236f]/10'
+                    : 'bg-[#faf8ff] border-[#eaedff] hover:border-[#00236f]/40'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-[#004942] text-white flex items-center justify-center font-['JetBrains_Mono'] text-xs font-bold">
+                    EV
+                  </div>
+                  <div>
+                    <strong className="text-xs sm:text-sm font-bold text-[#131b2e] block">Elena Vasiliev</strong>
+                    <span className="text-xs text-[#444651]">Technical PM</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between text-[11px] pt-2 border-t border-[#eaedff]/60">
+                  <span className="text-[#00236f] font-mono">6+ yrs exp</span>
+                  <span className="font-semibold text-[#004942]">Product Preset</span>
+                </div>
               </button>
             </div>
           </div>
-        )}
-      </div>
+
+          {/* Upload Dropzone */}
+          <div className="p-6 rounded-2xl border-2 border-dashed border-[#dae2fd] bg-[#faf8ff] text-center flex flex-col items-center justify-center gap-2 hover:border-[#00236f] transition-colors">
+            <span className="material-symbols-outlined text-[32px] text-[#00236f]">upload_file</span>
+            <div className="text-xs sm:text-sm text-[#444651]">
+              <label className="font-bold text-[#00236f] hover:underline cursor-pointer">
+                Upload your resume
+                <input
+                  type="file"
+                  accept=".pdf,.docx,.txt"
+                  onChange={handleCustomUpload}
+                  className="hidden"
+                />
+              </label>{' '}
+              <span>(PDF, DOCX, or plain text)</span>
+            </div>
+            <span className="text-xs text-[#757682] font-mono">
+              Current loaded: {resumeFileName}
+            </span>
+          </div>
+
+          {/* Candidate Summary Preview */}
+          <div className="p-4 rounded-xl bg-[#f2f3ff] border border-[#eaedff] flex flex-col gap-2.5">
+            <div className="flex justify-between items-center">
+              <span className="text-xs font-bold text-[#131b2e]">
+                Selected Candidate: {features.name} ({features.track})
+              </span>
+              <span className="text-xs font-mono text-[#004942] bg-[#89f5e7]/40 px-2.5 py-0.5 rounded font-semibold">
+                {features.skills.length} Skills Extracted
+              </span>
+            </div>
+            <p className="text-xs text-[#444651] leading-relaxed">
+              {features.summary}
+            </p>
+            <div className="flex flex-wrap gap-1.5 pt-1">
+              {features.skills.map((s) => (
+                <span key={s} className="text-xs font-mono px-2.5 py-1 rounded-md bg-white text-[#00236f] border border-[#eaedff]">
+                  {s}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Next Button */}
+          <div className="flex justify-between items-center pt-2">
+            <span className="text-xs text-[#757682]">
+              Files are processed in ephemeral memory and discarded immediately.
+            </span>
+            <button
+              onClick={() => setCurrentStep(2)}
+              className="px-6 py-3 bg-[#00236f] text-white rounded-xl font-['JetBrains_Mono'] text-xs sm:text-sm font-semibold hover:bg-[#1e3a8a] transition flex items-center gap-2 cursor-pointer shadow-xs"
+            >
+              <span>Next: Target Job Criteria</span>
+              <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* STEP 2: TARGET JOB */}
+      {currentStep === 2 && (
+        <div className="bg-white rounded-2xl p-6 sm:p-7 border border-[#eaedff] shadow-xs flex flex-col gap-6">
+          <div>
+            <h2 className="font-['Hanken_Grotesk'] text-xl sm:text-2xl font-bold text-[#131b2e]">
+              Target Job & Employer Context
+            </h2>
+            <p className="text-xs sm:text-sm text-[#444651] mt-0.5">
+              Screening algorithms evaluate candidate relevance against target role criteria and keyword requirements:
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-semibold text-[#131b2e] block mb-1.5">
+                  Target Position Title
+                </label>
+                <input
+                  type="text"
+                  value={jobTarget.title}
+                  onChange={(e) => setJobTarget({ ...jobTarget, title: e.target.value })}
+                  className="w-full p-3 rounded-xl bg-[#f2f3ff] border border-[#eaedff] text-xs sm:text-sm font-medium text-[#131b2e] focus:outline-none focus:border-[#00236f]"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-[#131b2e] block mb-1.5">
+                  Hiring Organization / Employer
+                </label>
+                <input
+                  type="text"
+                  value={jobTarget.company}
+                  onChange={(e) => setJobTarget({ ...jobTarget, company: e.target.value })}
+                  className="w-full p-3 rounded-xl bg-[#f2f3ff] border border-[#eaedff] text-xs sm:text-sm font-medium text-[#131b2e] focus:outline-none focus:border-[#00236f]"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs font-semibold text-[#131b2e] block mb-1.5">
+                Job Description Summary / Required Keywords
+              </label>
+              <textarea
+                rows={4}
+                value={jobTarget.description}
+                onChange={(e) => setJobTarget({ ...jobTarget, description: e.target.value })}
+                className="w-full p-3 rounded-xl bg-[#f2f3ff] border border-[#eaedff] text-xs sm:text-sm text-[#131b2e] focus:outline-none focus:border-[#00236f] resize-none leading-relaxed"
+              />
+            </div>
+
+            <div className="p-4 rounded-xl bg-[#eaedff]/60 border border-[#dae2fd] flex items-center justify-between">
+              <div>
+                <span className="text-xs font-bold text-[#00236f] block">
+                  Keyword Correlation Match
+                </span>
+                <span className="text-[11px] text-[#444651]">
+                  Estimated ATS initial keyword relevance
+                </span>
+              </div>
+              <span className="font-['JetBrains_Mono'] text-base font-bold text-[#004942] bg-white px-3 py-1 rounded-lg border border-[#dae2fd]">
+                {jobTarget.matchScore}% Match
+              </span>
+            </div>
+          </div>
+
+          <div className="flex justify-between items-center pt-2">
+            <button
+              onClick={() => setCurrentStep(1)}
+              className="text-xs text-[#757682] hover:text-[#131b2e] font-['JetBrains_Mono'] font-medium flex items-center gap-1 cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[16px]">arrow_back</span>
+              <span>Back to Resume</span>
+            </button>
+            <button
+              onClick={() => setCurrentStep(3)}
+              className="px-6 py-3 bg-[#00236f] text-white rounded-xl font-['JetBrains_Mono'] text-xs sm:text-sm font-semibold hover:bg-[#1e3a8a] transition flex items-center gap-2 cursor-pointer shadow-xs"
+            >
+              <span>Next: Comparison Variants</span>
+              <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* STEP 3: CONTROLLED COMPARISONS & RUN */}
+      {currentStep === 3 && (
+        <div className="bg-white rounded-2xl p-6 sm:p-7 border border-[#eaedff] shadow-xs flex flex-col gap-6">
+          <div>
+            <h2 className="font-['Hanken_Grotesk'] text-xl sm:text-2xl font-bold text-[#131b2e]">
+              Controlled Comparison Suite
+            </h2>
+            <p className="text-xs sm:text-sm text-[#444651] mt-0.5">
+              The exact same credentials and skills will be scored with different name indicators to isolate screening model sensitivity:
+            </p>
+          </div>
+
+          {/* Variants List */}
+          <div className="space-y-3">
+            {variants.map((v) => (
+              <div
+                key={v.id}
+                className={`p-4 rounded-xl border flex items-center justify-between transition ${
+                  v.isBaseline
+                    ? 'bg-[#ffdad6]/20 border-[#ffdad6]'
+                    : v.active
+                    ? 'bg-[#f2f3ff] border-[#eaedff]'
+                    : 'bg-[#faf8ff] border-[#eaedff] opacity-60'
+                }`}
+              >
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-2">
+                    <strong className="text-xs sm:text-sm font-bold text-[#131b2e]">{v.name}</strong>
+                    {v.isBaseline ? (
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#ba1a1a] text-white font-bold">
+                        Baseline (Original)
+                      </span>
+                    ) : (
+                      <span className="text-[11px] font-mono text-[#757682]">
+                        {v.signal}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-xs text-[#444651] mt-0.5">
+                    Credentials, Skills & Experience: 100% Invariant
+                  </span>
+                </div>
+
+                {!v.isBaseline && (
+                  <button
+                    type="button"
+                    onClick={() => toggleVariant(v.id)}
+                    className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-medium transition cursor-pointer ${
+                      v.active
+                        ? 'bg-[#00236f] text-white'
+                        : 'bg-white text-[#757682] border border-[#eaedff]'
+                    }`}
+                  >
+                    {v.active ? 'Included' : 'Excluded'}
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Ethical agreement checkbox */}
+          <label className="flex items-start gap-3 p-4 rounded-xl bg-[#faf8ff] border border-[#eaedff] text-xs text-[#444651] cursor-pointer">
+            <input
+              type="checkbox"
+              checked={ethicsAccepted}
+              onChange={(e) => setEthicsAccepted(e.target.checked)}
+              className="mt-0.5 rounded text-[#00236f] w-4 h-4 cursor-pointer"
+            />
+            <span>
+              I understand this audit runs in an ephemeral local session for diagnostic testing and pre-submission clarity, not deceptive submissions.
+            </span>
+          </label>
+
+          {/* Action buttons */}
+          <div className="flex justify-between items-center pt-2">
+            <button
+              onClick={() => setCurrentStep(2)}
+              className="text-xs text-[#757682] hover:text-[#131b2e] font-['JetBrains_Mono'] font-medium flex items-center gap-1 cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[16px]">arrow_back</span>
+              <span>Back to Job Target</span>
+            </button>
+            <button
+              onClick={handleStartAudit}
+              disabled={!ethicsAccepted}
+              className="px-6 sm:px-8 py-3.5 bg-[#004942] text-white rounded-xl font-['JetBrains_Mono'] text-xs sm:text-sm font-bold hover:bg-[#003833] transition flex items-center gap-2 cursor-pointer shadow-sm disabled:opacity-50"
+            >
+              <span className="material-symbols-outlined text-[20px]">play_arrow</span>
+              <span>Run Sensitivity Audit Now</span>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

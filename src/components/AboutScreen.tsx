@@ -24,7 +24,7 @@ export const AboutScreen: React.FC = () => {
   ];
 
   return (
-    <div className="flex flex-col w-full max-w-xl mx-auto px-4 py-4 gap-4 pb-24">
+    <div className="flex flex-col w-full max-w-4xl mx-auto px-4 sm:px-6 py-6 gap-6 pb-28 md:pb-12">
       {/* Brand Hero */}
       <div className="bg-white rounded-xl p-5 shadow-xs border border-[#eaedff] flex flex-col items-center text-center gap-3">
         <img src={LOGO_IMG_URL} alt="BiasCheck Logo" className="h-12 w-auto object-contain" />
@@ -36,10 +36,10 @@ export const AboutScreen: React.FC = () => {
         </p>
         <div className="flex gap-2 flex-wrap justify-center pt-1 font-['JetBrains_Mono'] text-xs">
           <span className="px-2.5 py-1 rounded bg-[#f2f3ff] text-[#00236f] font-semibold border border-[#eaedff]">
-            Engine v2.4 (Calibrated)
+            Independent Research Audit
           </span>
           <span className="px-2.5 py-1 rounded bg-[#00312c] text-[#89f5e7] font-semibold">
-            ISO/IEC 29115
+            Aligned with IEEE 7003
           </span>
         </div>
       </div>

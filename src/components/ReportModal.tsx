@@ -15,6 +15,10 @@ export const ReportModal: React.FC<ReportModalProps> = ({ audit, isOpen, onClose
     window.print();
   };
 
+  const topVariant = audit.variants && audit.variants.length > 0 
+    ? [...audit.variants].sort((a, b) => b.score - a.score)[0] 
+    : null;
+
   return (
     <div className="fixed inset-0 z-50 bg-[#131b2e]/60 backdrop-blur-sm p-4 flex items-center justify-center overflow-y-auto">
       <div className="bg-white rounded-2xl max-w-lg w-full p-5 sm:p-6 shadow-2xl border border-[#eaedff] flex flex-col gap-4 max-h-[90vh] overflow-y-auto no-scrollbar">
@@ -42,8 +46,8 @@ export const ReportModal: React.FC<ReportModalProps> = ({ audit, isOpen, onClose
               <span className="font-bold text-[#00236f]">#{audit.id}</span>
             </div>
             <div className="text-right">
-              <span className="text-[10px] text-[#444651] block uppercase">Verification Status</span>
-              <span className="font-bold text-[#004942]">ISO/IEC 29115 Verified</span>
+              <span className="text-[10px] text-[#444651] block uppercase">Evaluation Standard</span>
+              <span className="font-bold text-[#004942]">Aligned with IEEE 7003</span>
             </div>
           </div>
 
@@ -70,27 +74,29 @@ export const ReportModal: React.FC<ReportModalProps> = ({ audit, isOpen, onClose
               </div>
               <div className="flex justify-between">
                 <span>Average Demographic Penalty:</span>
-                <span className="font-bold text-[#904d00]">Δ {audit.avgDeltaPenalty} pts</span>
+                <span className="font-bold text-[#904d00]">
+                  {audit.avgDeltaPenalty > 0 ? `-${audit.avgDeltaPenalty}` : audit.avgDeltaPenalty} pts
+                </span>
               </div>
               <div className="flex justify-between">
-                <span>Baseline Score (Amara Okoye):</span>
+                <span>Baseline Score ({audit.candidateName}):</span>
                 <span className="font-bold">{audit.originalScore} / 100</span>
               </div>
               <div className="flex justify-between">
-                <span>Counterfactual Top Score (Emily Watson):</span>
+                <span>Counterfactual Top Score ({topVariant ? topVariant.name : 'Emily Watson'}):</span>
                 <span className="font-bold">{audit.topScore} / 100</span>
               </div>
             </div>
           </div>
 
-          {/* Forensic Invariance Check */}
+          {/* Invariance Check */}
           <div className="p-2.5 rounded-lg bg-[#00312c] text-white text-[11px] flex items-center justify-between">
-            <span>Kolmogorov-Smirnov Invariance Metric:</span>
-            <span className="font-bold text-[#89f5e7]">0.9984 (Validated)</span>
+            <span>Invariance Similarity Score (1 - D):</span>
+            <span className="font-bold text-[#89f5e7]">&gt; 0.99 (Distribution Match)</span>
           </div>
 
           <p className="text-[10px] text-[#444651] italic leading-tight pt-1">
-            Disclaimer: Generated via Proxy Audit Engine v2.4 in deterministic testing mode. Not legal proof of specific employer ATS decisioning.
+            Disclaimer: Generated in perturbation sensitivity mode (N=12 comparison runs). Directional screening proxy, not legal proof of individual employer ATS intent.
           </p>
         </div>
 
@@ -98,14 +104,14 @@ export const ReportModal: React.FC<ReportModalProps> = ({ audit, isOpen, onClose
         <div className="flex gap-2 pt-2 border-t border-[#eaedff]">
           <button
             onClick={handlePrint}
-            className="flex-1 py-2.5 bg-[#00236f] text-white rounded-lg font-['JetBrains_Mono'] text-xs font-semibold flex items-center justify-center gap-1.5 shadow-sm hover:bg-[#1e3a8a] active:scale-95 transition"
+            className="flex-1 py-2 rounded-xl bg-[#00236f] text-white font-['JetBrains_Mono'] text-xs font-semibold hover:bg-[#1e3a8a] transition flex items-center justify-center gap-1.5"
           >
             <span className="material-symbols-outlined text-[16px]">print</span>
-            <span>Print / Save PDF</span>
+            <span>Print Official Audit Certificate</span>
           </button>
           <button
             onClick={onClose}
-            className="px-4 py-2.5 bg-[#f2f3ff] text-[#444651] rounded-lg font-['JetBrains_Mono'] text-xs font-semibold hover:bg-[#eaedff] transition"
+            className="px-4 py-2 rounded-xl bg-[#f2f3ff] text-[#444651] font-['JetBrains_Mono'] text-xs font-semibold hover:bg-[#eaedff] transition"
           >
             Close
           </button>

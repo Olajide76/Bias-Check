@@ -16,12 +16,17 @@ export const RunningAuditScreen: React.FC<RunningAuditScreenProps> = ({
   const [stage, setStage] = useState(5);
   const [liveLogIndex, setLiveLogIndex] = useState(3);
   const [isFinishing, setIsFinishing] = useState(false);
+  const [elapsedTime, setElapsedTime] = useState(1.8);
 
   // SVG ring circumference for r=44 is ~276.46
   const circumference = 276.46;
   const strokeDashoffset = circumference - (circumference * percent) / 100;
 
   useEffect(() => {
+    const elapsedTimer = setInterval(() => {
+      setElapsedTime((prev) => +(prev + 0.2).toFixed(1));
+    }, 200);
+
     const timer = setInterval(() => {
       setPercent((prev) => {
         if (prev >= 100) {
@@ -40,6 +45,7 @@ export const RunningAuditScreen: React.FC<RunningAuditScreenProps> = ({
     }, 1800);
 
     return () => {
+      clearInterval(elapsedTimer);
       clearInterval(timer);
       clearInterval(logTimer);
     };
@@ -66,18 +72,23 @@ export const RunningAuditScreen: React.FC<RunningAuditScreenProps> = ({
   };
 
   return (
-    <div className="flex flex-col w-full px-4 py-4 max-w-xl mx-auto gap-4 pb-24">
+    <div className="flex flex-col w-full px-4 sm:px-6 py-6 max-w-2xl mx-auto gap-5 pb-28 md:pb-12">
       {/* Audit Trace Pill */}
       <div className="flex items-center justify-between bg-[#f2f3ff] px-4 py-2.5 rounded-xl border border-[#eaedff] shadow-xs">
         <div className="flex items-center gap-2 text-[#444651]">
           <span className="material-symbols-outlined text-[18px] text-[#00236f]">verified_user</span>
           <span className="font-['JetBrains_Mono'] text-xs font-semibold">AUDIT TRACE</span>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-[#904d00] animate-ping"></span>
-          <span className="font-['JetBrains_Mono'] text-xs text-[#00236f] font-bold">
-            #{auditId}
+        <div className="flex items-center gap-2.5">
+          <span className="font-['JetBrains_Mono'] text-[11px] text-[#444651] bg-white px-2 py-0.5 rounded border border-[#eaedff]">
+            {elapsedTime}s elapsed
           </span>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-[#904d00] animate-ping"></span>
+            <span className="font-['JetBrains_Mono'] text-xs text-[#00236f] font-bold">
+              #{auditId}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -146,13 +157,13 @@ export const RunningAuditScreen: React.FC<RunningAuditScreenProps> = ({
           </div>
         </div>
 
-        {/* Layer badge */}
+        {/* Analysis status badge */}
         <div className="flex items-center gap-2 bg-[#eaedff] px-3.5 py-1.5 rounded-full mt-2 border border-[#dae2fd]">
           <span className="material-symbols-outlined text-[15px] text-[#00236f] animate-spin">
             cyclone
           </span>
           <span className="font-['JetBrains_Mono'] text-xs text-[#131b2e] font-medium">
-            Layer 14 Tensor Decomposition
+            Evaluating Cross-Model Feature Attention
           </span>
         </div>
       </div>

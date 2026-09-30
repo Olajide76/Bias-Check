@@ -14,6 +14,13 @@ export interface ExtractedFeatures {
   educationTier: string;
 }
 
+export interface SensitivityItem {
+  name: string;
+  percentage: number;
+  variancePts: number;
+  level: 'High' | 'Moderate' | 'Low' | 'Neutral';
+}
+
 export interface JobTarget {
   title: string;
   company: string;
@@ -64,4 +71,10 @@ export interface AuditRecord {
   jobTarget: JobTarget;
   variants: CounterfactualVariant[];
   recommendations: Recommendation[];
+  modelAGap?: number;
+  modelBGap?: number;
+  sensitivityAttribution?: SensitivityItem[];
+  elapsedSeconds?: number;
+  isSampleData?: boolean;
+  isSampleBenchmark?: boolean;
 }

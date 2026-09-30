@@ -8,29 +8,27 @@ interface BottomNavProps {
 
 export const BottomNav: React.FC<BottomNavProps> = ({ currentTab, onNavigate }) => {
   const tabs: { id: TabType; label: string; icon: string }[] = [
-    { id: 'overview', label: 'Overview', icon: 'analytics' },
-    { id: 'new-audit', label: 'New Audit', icon: 'biotech' },
-    { id: 'history', label: 'History', icon: 'history_edu' },
-    { id: 'methodology', label: 'Methodology', icon: 'science' },
-    { id: 'about', label: 'About', icon: 'info' }
+    { id: 'overview', label: 'Home', icon: 'home' },
+    { id: 'new-audit', label: 'New Audit', icon: 'add_circle' },
+    { id: 'report', label: 'Results', icon: 'insights' },
+    { id: 'history', label: 'History', icon: 'history' },
+    { id: 'methodology', label: 'How It Works', icon: 'menu_book' }
   ];
 
   return (
-    <nav className="fixed bottom-0 w-full z-40 pb-safe bg-[#faf8ff]/95 backdrop-blur-xl border-t border-[#eaedff] shadow-[0_-1px_8px_rgba(0,0,0,0.03)]">
+    <nav className="md:hidden fixed bottom-0 w-full z-40 pb-safe bg-[#faf8ff]/95 backdrop-blur-xl border-t border-[#eaedff] shadow-[0_-1px_8px_rgba(0,0,0,0.03)]">
       <div className="flex justify-around items-center h-16 max-w-xl mx-auto px-2">
         {tabs.map((tab) => {
-          const isActive =
-            currentTab === tab.id ||
-            (tab.id === 'new-audit' && (currentTab === 'running' || currentTab === 'report'));
+          const isActive = currentTab === tab.id;
 
           return (
             <button
               key={tab.id}
               onClick={() => onNavigate(tab.id)}
-              className={`flex flex-col items-center justify-center min-w-[54px] min-h-[44px] py-1 transition-all rounded-lg focus:outline-none ${
+              className={`flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 transition-all rounded-lg focus:outline-none cursor-pointer ${
                 isActive
                   ? 'text-[#00236f] font-semibold scale-105'
-                  : 'text-[#444651] hover:text-[#131b2e]'
+                  : 'text-[#757682] hover:text-[#131b2e]'
               }`}
             >
               <span

@@ -15,7 +15,7 @@ export const DEFAULT_EXTRACTED_FEATURES: ExtractedFeatures = {
   positionsCount: 3,
   positionYears: "2019 – Present",
   education: "B.Sc. Computer Science",
-  educationTier: "Accredited Tier-1"
+  educationTier: "Accredited University"
 };
 
 export const DEFAULT_JOB_TARGET: JobTarget = {
@@ -42,9 +42,9 @@ export const DEFAULT_VARIANTS: CounterfactualVariant[] = [
     signal: "West African / Female",
     substantiveText: "Original Candidate",
     active: true,
-    score: 71,
-    modelAScore: 71,
-    modelBScore: 73
+    score: 78,
+    modelAScore: 78,
+    modelBScore: 80
   },
   {
     id: "var-a",
@@ -54,9 +54,9 @@ export const DEFAULT_VARIANTS: CounterfactualVariant[] = [
     signal: "Anglo-Saxon / Female",
     substantiveText: "100% Invariant",
     active: true,
-    score: 86,
-    modelAScore: 86,
-    modelBScore: 82
+    score: 93,
+    modelAScore: 93,
+    modelBScore: 89
   },
   {
     id: "var-b",
@@ -66,9 +66,9 @@ export const DEFAULT_VARIANTS: CounterfactualVariant[] = [
     signal: "East Asian / Male",
     substantiveText: "100% Invariant",
     active: true,
-    score: 79,
-    modelAScore: 79,
-    modelBScore: 78
+    score: 85,
+    modelAScore: 85,
+    modelBScore: 85
   },
   {
     id: "var-c",
@@ -78,9 +78,9 @@ export const DEFAULT_VARIANTS: CounterfactualVariant[] = [
     signal: "West African / Male",
     substantiveText: "100% Invariant",
     active: true,
-    score: 72,
-    modelAScore: 72,
-    modelBScore: 74
+    score: 79,
+    modelAScore: 78,
+    modelBScore: 80
   }
 ];
 
@@ -89,27 +89,27 @@ export const DEFAULT_RECOMMENDATIONS: Recommendation[] = [
     id: 1,
     title: "1. Make Achievements Measurable",
     icon: "data_object",
-    potentialPoints: 4.2,
+    potentialPoints: 4,
     currentSnippet: 'Worked on several structural and microservice backend projects.',
     suggestedSnippet: 'Engineered scalable REST microservices handling 2.4M requests/day with 99.98% uptime using Node.js & Redis.',
     applied: false
   },
   {
     id: 2,
-    title: "2. Standardize Date & Section Tokens",
+    title: "2. Standardize Date & Section Format",
     icon: "calendar_month",
-    potentialPoints: 2.6,
+    potentialPoints: 3,
     currentSnippet: 'Experience — Remote Engineer (2022-Now)',
     suggestedSnippet: 'Professional Experience: Senior Software Engineer | FinTech Systems | 03/2022 – Present',
     applied: false
   },
   {
     id: 3,
-    title: "3. Front-load Hard Tech Competencies",
+    title: "3. Front-load Core Technical Skills",
     icon: "hub",
-    potentialPoints: 3.1,
+    potentialPoints: 3,
     currentSnippet: 'Skills: React, JavaScript, Go, cloud infrastructure, backend frameworks.',
-    suggestedSnippet: 'Categorize into distinct taxonomy tags (Languages: TypeScript, Go | Frameworks: Next.js, Django | Cloud: AWS Lambda, ECS).',
+    suggestedSnippet: 'Categorize into clear categories (Languages: TypeScript, Go | Frameworks: Next.js, Django | Cloud: AWS, Docker).',
     applied: false
   }
 ];
@@ -121,39 +121,54 @@ export const INITIAL_AUDIT_RECORD: AuditRecord = {
   company: "Fintech Global Ltd",
   date: "Today, 11:28 AM",
   observedSpread: 15,
-  avgDeltaPenalty: -9.2,
-  originalScore: 71,
-  topScore: 86,
+  avgDeltaPenalty: -12.0, // Computed live: Model A gap (93 - 78 = 15) and Model B gap (89 - 80 = 9) -> -(15 + 9)/2 = -12.0
+  originalScore: 78,
+  topScore: 93,
+  modelAGap: 15,
+  modelBGap: 9,
   variantsCount: 3,
-  confidence: "Moderate (N=12)",
+  confidence: "High (N=12)",
   status: "Completed",
+  elapsedSeconds: 4.2,
   features: DEFAULT_EXTRACTED_FEATURES,
   jobTarget: DEFAULT_JOB_TARGET,
   variants: DEFAULT_VARIANTS,
-  recommendations: DEFAULT_RECOMMENDATIONS
+  recommendations: DEFAULT_RECOMMENDATIONS,
+  sensitivityAttribution: [
+    { name: "Name / Identity Indicators", percentage: 70, variancePts: 10.5, level: "High" },
+    { name: "Layout & Date Formatting", percentage: 16, variancePts: 2.4, level: "Moderate" },
+    { name: "Work Experience Quantifiers", percentage: 10, variancePts: 1.5, level: "Low" },
+    { name: "Technical Skills Grouping", percentage: 4, variancePts: 0.6, level: "Neutral" }
+  ]
 };
 
 export const PAST_AUDITS: AuditRecord[] = [
   INITIAL_AUDIT_RECORD,
   {
-    id: "AUD-2026-0921-42",
+    id: "AUD-REF-0921-42",
     candidateName: "Marcus Vance",
     targetRole: "Lead Product Manager",
     company: "Stripe",
-    date: "Sep 21, 2026",
+    date: "Benchmark Reference Set",
+    isSampleData: true,
+    isSampleBenchmark: true,
     observedSpread: 11,
-    avgDeltaPenalty: -6.4,
+    avgDeltaPenalty: -11.0,
     originalScore: 74,
     topScore: 85,
+    modelAGap: 11,
+    modelBGap: 11,
     variantsCount: 4,
     confidence: "High (N=16)",
     status: "Completed",
+    elapsedSeconds: 4.8,
     features: {
       ...DEFAULT_EXTRACTED_FEATURES,
       name: "Marcus Vance",
       demographicMarker: "African American / Male",
       track: "Product Management",
-      education: "M.B.A. Stanford University"
+      education: "M.B.A. Stanford University",
+      educationTier: "Accredited University"
     },
     jobTarget: {
       ...DEFAULT_JOB_TARGET,
@@ -167,24 +182,30 @@ export const PAST_AUDITS: AuditRecord[] = [
     recommendations: DEFAULT_RECOMMENDATIONS
   },
   {
-    id: "AUD-2026-0914-19",
+    id: "AUD-REF-0914-19",
     candidateName: "Priya Sharma",
     targetRole: "Staff Data Scientist (GenAI)",
-    company: "Anthropic / DeepMind",
-    date: "Sep 14, 2026",
+    company: "Anthropic",
+    date: "Benchmark Reference Set",
+    isSampleData: true,
+    isSampleBenchmark: true,
     observedSpread: 8,
-    avgDeltaPenalty: -4.8,
+    avgDeltaPenalty: -8.0,
     originalScore: 81,
     topScore: 89,
+    modelAGap: 6,
+    modelBGap: 10,
     variantsCount: 3,
     confidence: "High (N=20)",
     status: "Completed",
+    elapsedSeconds: 4.5,
     features: {
       ...DEFAULT_EXTRACTED_FEATURES,
       name: "Priya Sharma",
       demographicMarker: "South Asian / Female",
       track: "Machine Learning / NLP",
-      education: "Ph.D. Computer Engineering"
+      education: "Ph.D. Computer Engineering",
+      educationTier: "Accredited University"
     },
     jobTarget: {
       ...DEFAULT_JOB_TARGET,

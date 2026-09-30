@@ -17,6 +17,7 @@ import { ReportModal } from './components/ReportModal';
 import { ProfileModal } from './components/ProfileModal';
 import { INITIAL_AUDIT_RECORD, PAST_AUDITS } from './data/mockData';
 import { AuditRecord, CounterfactualVariant, ExtractedFeatures, JobTarget, TabType } from './types';
+import { computeAuditScoring } from './utils/scoringEngine';
 
 export default function App() {
   const [currentTab, setCurrentTab] = useState<TabType>('overview');
@@ -39,23 +40,29 @@ export default function App() {
     variants: CounterfactualVariant[];
   }) => {
     const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+    const computed = computeAuditScoring(config.features, config.jobTarget, config.variants);
+
     const newRecord: AuditRecord = {
       id: `AUD-2026-0928-${randomSuffix.toString().slice(0, 2)}`,
       candidateName: config.features.name,
       targetRole: config.jobTarget.title,
       company: config.jobTarget.company,
       date: 'Just now',
-      observedSpread: 15,
-      avgDeltaPenalty: -9.2,
-      originalScore: 71,
-      topScore: 86,
+      observedSpread: computed.observedSpread,
+      avgDeltaPenalty: computed.avgDeltaPenalty,
+      originalScore: computed.originalScore,
+      topScore: computed.topScore,
+      modelAGap: computed.modelAGap,
+      modelBGap: computed.modelBGap,
       variantsCount: config.variants.filter((v) => v.active && !v.isBaseline).length,
       confidence: 'Moderate (N=12)',
       status: 'Completed',
+      elapsedSeconds: computed.elapsedSeconds,
       features: config.features,
       jobTarget: config.jobTarget,
-      variants: config.variants,
-      recommendations: INITIAL_AUDIT_RECORD.recommendations.map((r) => ({ ...r, applied: false }))
+      variants: computed.variants,
+      recommendations: computed.recommendations,
+      sensitivityAttribution: computed.sensitivityAttribution
     };
 
     setActiveAudit(newRecord);
@@ -94,11 +101,7 @@ export default function App() {
       />
 
       {/* Main Content Area */}
-      <main
-        className={`flex-1 flex flex-col relative w-full ${
-          currentTab === 'running' || currentTab === 'report' ? 'pt-16' : 'pt-20'
-        } transition-all duration-200`}
-      >
+      <main className="flex-1 flex flex-col relative w-full pt-16 transition-all duration-200">
         {currentTab === 'overview' && (
           <OverviewScreen
             onStartDemo={handleStartDemoAudit}
